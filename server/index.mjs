@@ -7,35 +7,38 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
+const PORT = process.env.PORT || 5174
 
-const imagesDir = path.join(__dirname, '../images')
+// Serve images folder
+app.use('/images', express.static(path.join(__dirname, '../images')))
 
-// serve frontend build
+// Serve built React frontend
 app.use(express.static(path.join(__dirname, '../dist')))
 
-// serve images
-app.use('/images', express.static(imagesDir))
+// API: list gallery images
+app.get('/api/gallery', (req, res) => {
+  const imagesDir = path.join(__dirname, '../images')
+  const categories = []
 
-// API endpoint
-app.get('/api/list', (req, res) => {
-  const categories = fs.readdirSync(imagesDir).filter(f =>
-    fs.statSync(path.join(imagesDir, f)).isDirectory()
-  )
+  const folders = fs.readdirSync(imagesDir)
+  for (const folder of folders) {
+    const fullPath = path.join(imagesDir, folder)
+    if (fs.statSync(fullPath).isDirectory()) {
+      const imgs = fs
+        .readdirSync(fullPath)
+        .filter(f => /\.(jpg|jpeg|png|gif)$/i.test(f))
+        .map(f => `/images/${folder}/${f}`)
 
-  const result = categories.map(cat => {
-    const catPath = path.join(imagesDir, cat)
-    const files = fs.readdirSync(catPath)
-      .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
-      .map(file => `/images/${cat}/${file}`)
-    return { name: cat, images: files }
-  })
+      categories.push({ name: folder, images: imgs })
+    }
+  }
 
-  res.json(result)
+  res.json(categories)
 })
 
-// fallback to SPA
+// Fallback: always serve index.html for React router
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'))
 })
 
-app.listen(5174, () => console.log('🐱 Server running at http://localhost:5174'))
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
