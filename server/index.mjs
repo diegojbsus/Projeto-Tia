@@ -1,39 +1,41 @@
-import express from "express";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
+import express from 'express'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const app = express()
 
-// Serve the /images folder
-app.use("/images", express.static(path.join(__dirname, "..", "images")));
+const imagesDir = path.join(__dirname, '../images')
 
-// API: return categories + file list
-app.get("/api/gallery", (req, res) => {
-  const imagesDir = path.join(__dirname, "..", "images");
+// serve frontend build
+app.use(express.static(path.join(__dirname, '../dist')))
 
-  const categories = fs.readdirSync(imagesDir).map(cat => {
-    const folder = path.join(imagesDir, cat);
+// serve images
+app.use('/images', express.static(imagesDir))
 
-    const files = fs.readdirSync(folder)
-      .filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f))
-      .map(f => `/images/${cat}/${f}`);
+// API endpoint
+app.get('/api/list', (req, res) => {
+  const categories = fs.readdirSync(imagesDir).filter(f =>
+    fs.statSync(path.join(imagesDir, f)).isDirectory()
+  )
 
-    return { name: cat, images: files };
-  });
+  const result = categories.map(cat => {
+    const catPath = path.join(imagesDir, cat)
+    const files = fs.readdirSync(catPath)
+      .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
+      .map(file => `/images/${cat}/${file}`)
+    return { name: cat, images: files }
+  })
 
-  res.json(categories);
-});
+  res.json(result)
+})
 
-// Serve Vite build
-app.use(express.static(path.join(__dirname, "..", "dist")));
+// fallback to SPA
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'))
+})
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
-});
-
-app.listen(PORT, () => console.log("Server running at " + PORT));
+app.listen(5174, () => console.log('🐱 Server running at http://localhost:5174'))
