@@ -1,0 +1,74 @@
+:root{
+  --gap: 10px;
+  --card-radius: 8px;
+}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+.app{max-width:1100px;margin:0 auto;padding:12px}
+.topbar{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.topbar h1{margin:0;font-size:1.4rem}
+.subtitle{margin:0;color:#666;font-size:0.9rem}
+.placeholder, .error, .empty{padding:20px;text-align:center}
+.footer{margin-top:24px;text-align:center;color:#888;font-size:0.85rem}
+
+.category-bar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.category-bar button{padding:6px 10px;border-radius:14px;border:1px solid #ddd;background:#fff}
+.category-bar button.active{background:#111;color:#fff;border-color:#111}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+.card{background:#fff;border-radius:var(--card-radius);overflow:hidden;display:flex;flex-direction:column;cursor:pointer}
+.card img{display:block;width:100%;height:200px;object-fit:cover;transition:transform .25s ease}
+.card:hover img{transform:scale(1.03)}
+.card figcaption{padding:8px;font-size:0.9rem}
+
+/* --- LIGHTBOX (Zoom feature, top-aligned) --- */
+.lightbox-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  justify-content:center;        /* center horizontally */
+  align-items:flex-start;        /* top of the screen */
+  padding-top:24px;              /* small top offset */
+  z-index:9999;
+  cursor:zoom-out;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s ease;
+  overflow:auto;                 /* scroll if image is tall */
+}
+
+.lightbox-overlay.active{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.lightbox-image{
+  max-width:95%;
+  max-height:calc(100vh - 96px); /* prevents image from hitting bottom edge */
+  border-radius:12px;
+  transform-origin:top center;
+  transform:scale(0.85);
+  transition:transform .22s ease;
+}
+
+.lightbox-overlay.active .lightbox-image{
+  transform:scale(1);
+}
+
+/* Responsive: tablet */
+@media (max-width:900px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* Mobile: single column, smaller captions */
+@media (max-width:480px){
+  .grid{grid-template-columns:1fr}
+  .card img{height:160px}
+  .topbar h1{font-size:1.1rem}
+  
+  .lightbox-image{
+    max-height:calc(100vh - 64px);
+  }
+}
