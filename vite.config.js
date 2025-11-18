@@ -1,6 +1,10 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
 export default defineConfig({
   plugins: [react()],
-
+  
+  // Local-only (ignored in production)
   server: {
     proxy: {
       '/api': {
@@ -14,10 +18,9 @@ export default defineConfig({
     }
   },
 
-  publicDir: "images",   // ✅ tells Vite to copy /images into /dist/images
-
+  // Required for build
   build: {
     outDir: 'dist',
     emptyOutDir: true
   }
-});
+})
