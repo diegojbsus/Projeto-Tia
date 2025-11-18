@@ -1,26 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [react()],
   
-  // Local-only (ignored in production)
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5174',
-        changeOrigin: true,
-      },
-      '/images': {
-        target: 'http://localhost:5174',
-        changeOrigin: true,
-      }
-    }
-  },
-
-  // Required for build
   build: {
     outDir: 'dist',
     emptyOutDir: true
+  },
+
+  // Not used in production, only local dev
+  server: {
+    proxy: {
+      '/api': 'http://localhost:5174',
+      '/images': 'http://localhost:5174'
+    }
   }
 })
